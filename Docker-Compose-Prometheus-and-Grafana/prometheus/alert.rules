@@ -1,0 +1,31 @@
+groups:
+- name: host
+  rules:
+  - alert: gateway_service_success_rate
+    expr: ((sum(increase(gateway_service_http_response_count_total{status='5xx'}[2m])) by (service))/(sum(increase(gateway_service_http_response_count_total{}[2m])) by (service) > 10)) > 0.2
+    for: 5s
+    labels:
+      severity: warning
+    annotations:
+      summary: "service成功率低于80%"
+      description: "服务 {{ $labels.service }} 最近2分钟接口失败率{{$value}}"
+
+  - alert: gateway_interface_success_rate
+    expr: ((sum(increase(gateway_uri_http_response_count_total{status=~'5xx|4xx'}[10m])) by (uri))/(sum(increase(gateway_uri_http_response_count_total{}[10m])) by (uri) > 5)) > 0.5
+    for: 5s
+    labels:
+      severity: warning
+    annotations:
+      summary: "接口成功率低于50%"
+      description: "接口 {{ $labels.uri }} 最近10分钟接口失败率{{$value}}"
+
+  - alert: gateway_interface_slow
+    expr: ((sum(increase(gateway_uri_http_response_time_seconds_sum[24h] )) by (uri) /(sum(increase(gateway_uri_http_response_time_seconds_count[24h]) ) by (uri)  > 10)) > 2/(sum(increase(gateway_uri_http_response_time_seconds_sum[24h]  offset 1d)) by (uri) /(sum(increase(gateway_uri_http_response_time_seconds_count[24h] offset 1d) ) by (uri)  > 10)) > 0)>2
+    for: 5s
+    labels:
+      severity: warning
+    annotations:
+      summary: "接口同比上周变慢"
+      description: "接口 {{ $labels.uri }} 最近24小时平均响应时间是上周的{{$value}}倍，同时当前平均响应时间大于2s，请关注!"
+  
+

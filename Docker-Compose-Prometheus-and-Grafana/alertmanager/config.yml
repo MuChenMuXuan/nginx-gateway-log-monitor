@@ -1,0 +1,8 @@
+route:
+    receiver: 'default'
+
+receivers:
+    - name: 'default'
+      webhook_configs:
+      - url: 'http://prometheusalert:8080/prometheusalert?type=fs&tpl=prometheus-fs&fsurl=https://open.feishu.cn/open-apis/bot/v2/hook/xxx&at=zhangsan@xxx.com'
+        send_resolved: true
